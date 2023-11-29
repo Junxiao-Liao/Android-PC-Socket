@@ -24,8 +24,14 @@ public class MainActivity extends AppCompatActivity {
 
         socketUtils = new UsbSocketUtils(new UsbSocketUtils.OnReceiverListener() {
             @Override
-            public void onReceived(String text) {
-                receiveText.append(text + "\n");
+            public void onReceived(final String text) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 在主线程中更新UI的操作
+                        receiveText.append(text + "\n");
+                    }
+                });
             }
         });
 
