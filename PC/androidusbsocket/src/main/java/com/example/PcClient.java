@@ -77,7 +77,7 @@ public class PcClient {
                     int len = dis.read(buffer);  
                     if (len > 0) {
                         // Print received data
-                        System.out.println("\nReceived:" + new String(buffer, 0, len, "UTF-8"));
+                        System.out.println("\nReceived:\n" + new String(buffer, 0, len, "UTF-8"));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
