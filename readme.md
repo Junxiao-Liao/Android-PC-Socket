@@ -1,62 +1,43 @@
-# Android与PC通过USB通信
+# Communication Between Android and PC via USB
 
-## 1. 技术选择
+## 1. Technology Choices
 
-### 1.1使用Socket实现通信
+### 1.1 Using Sockets for Communication
 
-> 为什么可以通过USB线实现Socket通信:
-> 
-> USB线为PC和Android手机提供了物理层的数据传输通道。adb可以利用这个通道在两端创建网络端口并实现数据的转发。
-> 
-> 具体来说,adb forward命令在PC端映射端口8000,在手机端映射端口9000。PC端8000端口收到的数据会通过USB线传输给手机端。
-> 
-> 此时从网络协议的视角来看,PC端的8000端口对手机的9000端口提供了一条TCP连接。
-> 
-> 那么应用层的Socket接口可以通过这个TCP连接发送和接收数据,不关心底层是通过USB还是WiFi或者其他网络。
-> 
-> 而输入/输出流则通过Socket读取和写入不同端口之间转发的数据。
-> 
-> 总的来说,是由adb利用USB线在两端建立了TCP端口映射和数据转发功能。应用层代码基于TCP协议的Socket接口,依赖于这种转发与对端通信。
+> Why Sockets can be used for communication over USB:
+> USB cable provides a physical layer data transmission channel between the PC and Android phone. ADB can utilize this channel to create network ports on both ends and forward data. 
+> Specifically, the `adb forward` command maps port 8000 on the PC side and port 9000 on the phone side. Data received on port 8000 of the PC will be forwarded to the phone side over USB.  
+> From the network protocol perspective, port 8000 on the PC side now provides a TCP connection to port 9000 on the phone side.
+> Therefore, the Socket interface at the application layer can send and receive data over this TCP connection, without worrying about whether the underlying layer is USB, WiFi or other networks.
+> The Input/Output streams read and write data forwarded between different ports via the Socket.
+> In summary, adb utilizes the USB cable to establish TCP port forwarding and data forwarding on both ends. The application layer code leverages the Socket interface based on TCP protocol to communicate with the peer.
 
-### 1.2 没有使用`android.hardware.usb`库的原因:
+### 1.2 Reason for Not Using `android.hardware.usb`
 
-- 该库主要用于Android与USB外设通信
-- 尝试过几个开源库,无法直接读取PC端的USB端口数据
+- The library is mainly used for communication between Android and USB devices
+- Tried several open source libraries, unable to directly read USB port data on the PC side
 
-#### 2. 使用技术
+#### 2. Technologies Used
 
-### 2.1 PC端
+### 2.1 PC Side
 
-- Java语言
-  - Socket类:基于TCP协议的网络编程接口,用于连接adb转发的数据
-- adb命令 **(需要先在环境变量中配置adb路径)**
-  - adb forward: 在PC和手机之间通过USB线建立8000和9000端口的数据转发通道
+- Java language
+- Socket class: Java side only acts as Socket client
+- adb command (adb path needs to be configured in environment variable beforehand) 
+- adb forward: establish port forwarding over USB between ports 8000 and 9000
 
-### 2.2 Android端
+### 2.2 Android Side
 
-- Java语言
-  - Socket类:封装了基于TCP协议的网络编程接口,通过USB线转发与PC端通信
-- 并发编程
-  - 子线程:接收PC端的数据,避免阻塞UI线程
+- Java language
+- Socket class: acts as both server to establish connection, and client to send/receive data
 
-## 3. 运行和使用
+## 3. Running and Usage
 
-### 3.1 PC端
+### 3.1 Run Android side first
 
-1. 执行`adb forward tcp:8000 tcp:9000`在PC端8000端口与手机9000端口之间建立转发
+1. Can edit text in the `INPUT EDIT` section on top, press Enter to send edited text to PC side
+2. `RECEIVE TEXT` section at bottom will automatically display text received from PC side
 
-2. 运行PcClient程序,连接到8000端口
+### 3.2 Then run PC side
 
-3. 通过Socket的输出流发送数据到8000端口
-
-4. Socket的输入流接收从9000端口转发的数据
-
-### 3.2 Android端
-
-1. 主线程连接到本地9000端口,准备接收数据
-
-2. 子线程通过Socket不断读取输入流的数据
-
-3. 主线程通过Socket得到的输出流发送输入框的数据
-
-4. TextView更新显示收到的数据
+Similar to Android side, but text is sent/received via command line
