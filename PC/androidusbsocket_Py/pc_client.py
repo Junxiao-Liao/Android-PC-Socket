@@ -44,7 +44,7 @@ class PcClient:
 
 
 def message_callback(message):
-    print(f"Received: {message}")
+    print(f"\nReceived: {message}")
 
 
 if __name__ == "__main__":
@@ -53,5 +53,5 @@ if __name__ == "__main__":
     client.start_receive_thread()
 
     while True:
-        send_msg = input("Send: ")
+        send_msg = input("\nSend: ")
         client.send(send_msg)
